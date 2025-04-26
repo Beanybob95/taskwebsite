@@ -1,0 +1,57 @@
+<% layout('layouts/boilerplate')%>
+<div class="govuk-width-container">
+    <a href="/" class="govuk-back-link">Back</a>
+    <main class="govuk-main-wrapper">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl">Task Details</h1>
+                <dl class="govuk-summary-list">
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">
+                            Title
+                        </dt>
+                        <dd class="govuk-summary-list__value">
+                            <%= task.title %>
+                        </dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">
+                            Description
+                        </dt>
+                        <dd class="govuk-summary-list__value">
+                            <%= task.description %>
+                        </dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">
+                            Status
+                        </dt>
+                        <dd class="govuk-summary-list__value">
+                            <%= task.status.charAt(0).toUpperCase() + task.status.slice(1) %>
+                        </dd>
+                    </div>
+                    <div class="govuk-summary-list__row">
+                        <dt class="govuk-summary-list__key">
+                            Due Date
+                        </dt>
+                        <dd class="govuk-summary-list__value">
+                            <%= task.dueDate.toLocaleDateString('en-GB') %>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-half">
+                <a href="/task/<%= task._id.toString()%>/edit" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+                    Edit Task
+                </a>
+            </div>
+            <div class="govuk-grid-column-one-half">
+                <a href="/task/<%= task._id.toString()%>?_method=DELETE" role="button" draggable="false" class="govuk-button govuk-button--warning" data-module="govuk-button">
+                    Delete Task
+                </a>
+            </div>
+        </div>
+    </main>
+</div>

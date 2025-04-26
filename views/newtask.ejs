@@ -1,0 +1,57 @@
+<% layout('layouts/boilerplate')%>
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl">Create New Task</h1>
+                <form action="/newtask" method="post">
+                    <div class="govuk-form-group">
+                        <label class="govuk-label" for="taskTitle">
+                            What is the name of your task?
+                        </label>
+                        <input class="govuk-input" id="taskTitle" name="task[title]" type="text" required>
+                    </div>
+                    <div class="govuk-form-group">
+                        <label class="govuk-label" for="taskDescription">
+                            Add more detail about your task (optional)
+                        </label>
+                        <textarea class="govuk-textarea" id="taskDescription" name="task[description]" rows="3"></textarea>
+                    </div>
+                    <div class="govuk-form-group">
+                        <fieldset class="govuk-fieldset">
+                            <legend class="govuk-fieldset__legend">
+                                What is the status of your task?
+                            </legend>
+                            <div class="govuk-radios" data-module="govuk-radios">
+                                <div class="govuk-radios__item">
+                                    <input class="govuk-radios__input" id="taskCompleted" name="task[status]" type="radio" value="completed" required>
+                                    <label class="govuk-label govuk-radios__label" for="taskCompleted">
+                                        Completed
+                                    </label>
+                                </div>
+                                <div class="govuk-radios__item">
+                                    <input class="govuk-radios__input" id="taskIncomplete" name="task[status]" type="radio" value="incomplete" required>
+                                    <label class="govuk-label govuk-radios__label" for="taskIncomplete">
+                                        Incomplete
+                                    </label>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="govuk-form-group">
+                        <label class="govuk-label" for="taskDueDate">
+                            When is your task due?
+                        </label>
+                        <input class="govuk-input govuk-input--width-8" id="taskDueDate" name="task[dueDate]" type="date" required>
+                    </div>
+                    <div class="govuk-button-group">
+                        <button type="submit" class="govuk-button" data-module="govuk-button">
+                            Save and Close
+                        </button>
+                        <a class="govuk-link" href="/">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>

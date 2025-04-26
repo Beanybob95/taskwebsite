@@ -1,0 +1,159 @@
+<% layout('layouts/boilerplate')%>
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <h1 class="govuk-heading-xl">Tasks</h1>
+                <p class="govuk-body">
+                    Your tasks are automatically organized by status (with incomplete items at the top) and due date for easy tracking. Tasks due within the next two days are highlighted in red to help you prioritize urgent items. To manage any task, simply click on it to view details, make changes, or remove it from your list.
+                </p>
+                <p class="govuk-body">
+                    Manage your completed tasks efficiently by removing them individually, or use the "Clear Completed Tasks" button at the bottom of the page to remove all completed tasks at once.
+                </p>
+                <% if (totalTasks > tasksPerPage) { %>
+                <style>
+                    /* Hide number pagination on small screens */
+                    @media (max-width: 640px) {
+                        .govuk-pagination__list {
+                            display: none;
+                        }
+                        
+                        /* Make the prev/next buttons display side by side on mobile */
+                        .govuk-pagination {
+                            display: flex;
+                            flex-direction: row;
+                            flex-wrap: nowrap;
+                            justify-content: space-between;
+                            width: 100%;
+                        }
+                        
+                        .govuk-pagination__prev,
+                        .govuk-pagination__next {
+                            margin: 0;
+                            flex: 0 0 auto; /* Don't grow or shrink, stay at natural size */
+                            width: auto;
+                            max-width: 45%; /* Limit width to prevent overflow */
+                        }
+                        
+                        /* Create placeholders for missing buttons to maintain layout */
+                        .govuk-pagination__placeholder {
+                            flex: 0 0 auto;
+                            width: 45%; /* Match button width */
+                            visibility: hidden; /* Hide but keep the space */
+                        }
+                        
+                        /* Ensure link text stays on one line */
+                        .govuk-pagination__link-title {
+                            white-space: nowrap;
+                        }
+                    }
+                </style>
+                
+                <nav class="govuk-pagination" aria-label="Pagination">
+                    <% if (currentPage > 1) { %>
+                    <div class="govuk-pagination__prev">
+                        <a class="govuk-link govuk-pagination__link" href="?page=<%= currentPage - 1 %>" rel="prev">
+                            <svg class="govuk-pagination__icon govuk-pagination__icon--prev" xmlns="http://www.w3.org/2000/svg" height="13" width="15" aria-hidden="true" focusable="false" viewBox="0 0 15 13">
+                                <path d="m6.5938-0.0078125-6.7266 6.7266 6.7441 6.4062 1.377-1.449-4.1856-3.9768h12.896v-2h-12.984l4.2931-4.293-1.414-1.414z"></path>
+                            </svg>
+                            <span class="govuk-pagination__link-title">
+                                Previous<span class="govuk-visually-hidden"> page</span>
+                            </span>
+                        </a>
+                    </div>
+                    <% } else { %>
+                    <!-- Empty div to maintain layout on mobile when no prev button -->
+                    <div class="govuk-pagination__placeholder"></div>
+                    <% } %>
+                    
+                    <ul class="govuk-pagination__list">
+                        <% 
+                        // Determine which page numbers to show. Shows a max of 3 pages, with
+                        const maxPagesToShow = 3;
+                        let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+                        let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+                        
+                        // Adjust if we're at the end of the range
+                        if (endPage - startPage + 1 < maxPagesToShow) {
+                            startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                        }
+                        
+                        for (let i = startPage; i <= endPage; i++) { 
+                        %>
+                            <li class="govuk-pagination__item <%= i === currentPage ? 'govuk-pagination__item--current' : '' %>">
+                                <a class="govuk-link govuk-pagination__link" href="?page=<%= i %>" aria-label="Page <%= i %>" <%= i === currentPage ? 'aria-current="page"' : '' %>>
+                                    <%= i %>
+                                </a>
+                            </li>
+                        <% } %>
+                    </ul>
+                    
+                    <% if (currentPage < totalPages) { %>
+                    <div class="govuk-pagination__next">
+                        <a class="govuk-link govuk-pagination__link" href="?page=<%= currentPage + 1 %>" rel="next">
+                            <span class="govuk-pagination__link-title">
+                                Next<span class="govuk-visually-hidden"> page</span>
+                            </span>
+                            <svg class="govuk-pagination__icon govuk-pagination__icon--next" xmlns="http://www.w3.org/2000/svg" height="13" width="15" aria-hidden="true" focusable="false" viewBox="0 0 15 13">
+                                <path d="m8.107-0.0078125-1.4136 1.414 4.2926 4.293h-12.986v2h12.896l-4.1855 3.9766 1.377 1.4492 6.7441-6.4062-6.7246-6.7266z"></path>
+                            </svg>
+                        </a>
+                    </div>
+                    <% } else { %>
+                    <!-- Empty div to maintain layout on mobile when no next button -->
+                    <div class="govuk-pagination__placeholder"></div>
+                    <% } %>
+                </nav>
+                <% } %>
+                
+<!--                Create a new li tag for each task stored in MongoDB. We use different HTML tags to style the task list items depending on their status. The link in each task list item takes the user to the task's detail page.-->
+                <ul class="govuk-task-list">
+                    <% for (let task of tasks) {%>
+                        <li class="govuk-task-list__item govuk-task-list__item--with-link">
+                            <div class="govuk-task-list__name-and-hint">
+                                <a class="govuk-link govuk-task-list__link" href="/task/<%= task._id.toString()%>" aria-describedby="taskList">
+                                    <%= task.title %>
+                                </a>
+                                <div<%
+                                    const today = new Date();
+                                    today.setHours(0, 0, 0, 0); // Set to beginning of day for accurate comparison
+                                    const dueDate = new Date(task.dueDate);
+                                    dueDate.setHours(0, 0, 0, 0); // Set to beginning of day for accurate comparison
+                                    const timeDiff = dueDate.getTime() - today.getTime();
+                                    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                                if (daysDiff <= 2) {
+                                %> style="color: red;"<%
+                                }
+                                %>>Due Date: <%= task.dueDate.toLocaleDateString('en-GB') %></div>
+                            </div>
+                            <div class="govuk-task-list__status" id="taskList">
+                                <% if (task.status === "completed") { %>
+                                    <%= task.status.charAt(0).toUpperCase() + task.status.slice(1) %>
+                                <% } else { %>
+                                    <strong class="govuk-tag govuk-tag--blue">
+                                        <%= task.status.charAt(0).toUpperCase() + task.status.slice(1) %>
+                                    </strong>
+                                <% } %>
+                            </div>
+
+                        </li>
+                    <%}%>
+                </ul>
+            </div>
+        </div>
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-three-quarters">
+                <a href="/newtask" role="button" draggable="false" class="govuk-button" data-module="govuk-button">
+                    Add Another Task
+                </a>
+            </div>
+            <div class="govuk-grid-column-one-quarter">
+                <button type="submit" class="govuk-button govuk-button--warning" data-module="govuk-button">
+                    Delete All Completed Tasks
+                </button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!--task.status.charAt(0).toUpperCase() + task.status.slice(1)-->
