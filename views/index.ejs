@@ -148,12 +148,12 @@
                 </a>
             </div>
             <div class="govuk-grid-column-one-quarter">
-                <button type="submit" class="govuk-button govuk-button--warning" data-module="govuk-button">
-                    Delete All Completed Tasks
-                </button>
+                <form action="/clearcompleted?_method=DELETE" method="POST">
+                    <button type="submit" class="govuk-button govuk-button--warning" data-module="govuk-button">
+                        Delete All Completed Tasks
+                    </button>
+                </form>
             </div>
         </div>
     </main>
 </div>
-
-<!--task.status.charAt(0).toUpperCase() + task.status.slice(1)-->

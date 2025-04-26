@@ -1,3 +1,33 @@
-<h1><%= message %></h1>
-<h2><%= error.status %></h2>
-<pre><%= error.stack %></pre>
+<% layout('layouts/boilerplate')%>
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper govuk-main-wrapper--l" id="main-content" role="main">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-l">There was an error</h1>
+                
+                <% if (error && error.status === 404) { %>
+                    <p class="govuk-body">
+                        If you typed the web address, check it is correct.
+                    </p>
+                    <p class="govuk-body">
+                        If you pasted the web address, check you copied the entire address.
+                    </p>
+                <% } else { %>
+                    <p class="govuk-body">
+                        Sorry, something went wrong with your request.
+                    </p>
+                <% } %>
+                
+                <p class="govuk-body">
+                    <a href="/" class="govuk-link">Return to the task list</a>
+                </p>
+                
+                <% if (process.env.NODE_ENV !== 'production' && error && error.stack) { %>
+                    <div class="govuk-inset-text">
+                        <pre><%= error.stack %></pre>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
+</div>

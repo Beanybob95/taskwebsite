@@ -1,0 +1,30 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# IDE files
+.idea/
+.vscode/
+
+# Log files
+logs/
+*.log
+npm-debug.log*
+
+# Build artifacts
+dist/
+build/
+
+# Test coverage
+coverage/
+
+# MongoDB data directory
+data/
+
+# Mac OS specific files
+.DS_Store
+
+# Jest cache
+.jest/

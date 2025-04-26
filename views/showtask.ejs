@@ -48,9 +48,11 @@
                 </a>
             </div>
             <div class="govuk-grid-column-one-half">
-                <a href="/task/<%= task._id.toString()%>?_method=DELETE" role="button" draggable="false" class="govuk-button govuk-button--warning" data-module="govuk-button">
-                    Delete Task
-                </a>
+                <form action="/task/<%= task._id.toString()%>?_method=DELETE" method="POST">
+                    <button type="submit" class="govuk-button govuk-button--warning" data-module="govuk-button">
+                        Delete Task
+                    </button>
+                </form>
             </div>
         </div>
     </main>

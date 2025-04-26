@@ -39,13 +39,23 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
+  
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  
+  // Try to render the error page, fallback to plain text if that fails
+  res.render('error', {title: 'Error'}, function(renderErr, html) {
+    if (renderErr) {
+      console.error('Error rendering error template:', renderErr);
+      res.send(`<h1>Error: ${err.message}</h1><p>Additionally, there was an error rendering the error page.</p>`);
+    } else {
+      res.send(html);
+    }
+  });
 });
 
 module.exports = app;

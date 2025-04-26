@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Tasks = require('../models/Task');
+const createError = require('http-errors');
 
 /* GET home page. */
 router.get('/', async (req, res, next) => {
@@ -37,9 +38,13 @@ router.get('/', async (req, res, next) => {
 });
 
 
-
 router.get('/newtask', async (req, res, next) => {
-  res.render('newtask', { title: 'New Task' });
+  try {
+    res.render('newtask', { title: 'New Task' });
+  } catch (error) {
+    console.error('Error rendering new task form:', error);
+    next(error);
+  }
 });
 
 
@@ -47,11 +52,23 @@ router.get('/newtask', async (req, res, next) => {
 
 router.post('/newtask', async (req, res, next) => {
   try {
+    // Check if task data exists
+    if (!req.body.task) {
+      return next(createError(400, 'Task data is required'));
+    }
+    
     const task = new Tasks(req.body.task);
     await task.save();
     res.redirect('/');
   } catch (error) {
     console.error('Error creating task:', error);
+    
+    // Check if it's a validation error
+    if (error.name === 'ValidationError') {
+      // Pass validation errors to the error handler
+      return next(new Error(`Validation error: ${error.message}`));
+    }
+    
     next(error);
   }
 });
@@ -59,13 +76,37 @@ router.post('/newtask', async (req, res, next) => {
 
 
 router.get('/task/:id', async (req, res, next) => {
-  const task = await Tasks.findById(req.params.id);
-  res.render('showtask', { title: 'Task Details', task });
+  try {
+    const { id } = req.params;
+    const task = await Tasks.findById(id);
+    
+    if (!task) {
+      const err = createError(404, 'Task not found');
+      return next(err);
+    }
+    
+    res.render('showtask', { title: 'Task Details', task });
+  } catch (error) {
+    console.error('Error retrieving task details:', error);
+    next(error);
+
+  }
 });
 
 router.get('/task/:id/edit', async (req, res, next) => {
-  const task = await Tasks.findById(req.params.id);
-  res.render('edittask', { title: 'edit Task', task });
+  try {
+    const { id } = req.params;
+    const task = await Tasks.findById(id);
+    
+    if (!task) {
+      return next(new Error('Task not found'));
+    }
+    
+    res.render('edittask', { title: 'Edit Task', task });
+  } catch (error) {
+    console.error('Error retrieving task for editing:', error);
+    next(error);
+  }
 });
 
 
@@ -74,6 +115,12 @@ router.get('/task/:id/edit', async (req, res, next) => {
 router.put('/task/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
+    
+    // Check if task data exists
+    if (!req.body.task) {
+      return next(createError(400, 'Task data is required'));
+    }
+    
     // Use findByIdAndUpdate with proper syntax and options
     const task = await Tasks.findByIdAndUpdate(
         id,
@@ -83,15 +130,23 @@ router.put('/task/:id', async (req, res, next) => {
           runValidators: true  // Run schema validators on update
         }
     );
+    
     if (!task) {
       // Handle case where task is not found
-      return res.status(404).send('Task not found');
+      return next(new Error('Task not found'));
     }
-    // Redirect to task details page instead of rendering index
-    res.redirect(`/task/${task._id}`);
+    
+    // Redirect to home page
+    res.redirect('/');
 
   } catch (error) {
     console.error('Error updating task:', error);
+    
+    // Check if it's a validation error
+    if (error.name === 'ValidationError') {
+      return next(createError(400, `Validation error: ${error.message}`));
+    }
+    
     next(error);
   }
 });
@@ -101,10 +156,16 @@ router.put('/task/:id', async (req, res, next) => {
 router.delete('/task/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
+    
+    // Validate id format before attempting deletion
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      return next(createError(400, 'Invalid task ID format'));
+    }
+    
     const deletedTask = await Tasks.findByIdAndDelete(id);
     
     if (!deletedTask) {
-      return res.status(404).send('Task not found');
+      return next(new Error('Task not found'));
     }
     
     res.redirect('/');
@@ -117,9 +178,9 @@ router.delete('/task/:id', async (req, res, next) => {
 
 
 
-router.get('/clearcompleted', async (req, res, next) => {
+router.delete('/clearcompleted', async (req, res, next) => {
   try {
-    await Tasks.deleteMany({ status: 'completed' });
+    const result = await Tasks.deleteMany({ status: 'completed' });
     res.redirect('/');
   } catch (error) {
     console.error('Error deleting completed tasks:', error);
