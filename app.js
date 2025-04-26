@@ -9,7 +9,7 @@ const methodOverride = require('method-override');
 
 
 const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+
 
 mongoose.connect('mongodb://localhost:27017/taskswebsite', {})
 .then(() => console.log('MongoDB connection successful!'))
@@ -30,7 +30,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(methodOverride('_method'));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
